@@ -14,7 +14,8 @@ module.exports = {
         .setName('checkin')
         .setDescription('Daily check-in.')
         .addStringOption(option =>
-            option.setName('type')
+            option
+                .setName('type')
                 .setDescription('Type of check-in.')
                 .setRequired(true)
                 .addChoices(
