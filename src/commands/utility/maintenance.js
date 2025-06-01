@@ -17,19 +17,19 @@ module.exports = {
                 .setName('age')
                 .setDescription('Age of user.')
                 .setRequired(true)
-                )
+            )
         .addIntegerOption(option => 
             option
                 .setName('weight')
                 .setDescription('Weight of user (lbs).')
                 .setRequired(true)
-                )
+            )
         .addIntegerOption(option => 
             option
                 .setName('height')
                 .setDescription('Height of user (in).')
                 .setRequired(true)
-                )
+            )
         .addNumberOption(option => 
             option
                 .setName('activity_level')
@@ -41,7 +41,8 @@ module.exports = {
                     { name: 'moderate exercise (3-5 days/week)', value: 1.55 },
                     { name: 'heavy exercise (6-7 days/week)', value: 1.725 },
                     { name: 'athlete (2x per day)', value: 1.9 },
-                ))
+                )
+            )
         .addStringOption(option => 
             option
                 .setName('sex')
@@ -50,20 +51,21 @@ module.exports = {
                 .addChoices(
                     { name: 'male', value: 'male' },
                     { name: 'female', value: 'female' },
-                )),
+                )
+            ),
     async execute(interaction) {
         const age = interaction.options.getInteger('age');
         const weight = interaction.options.getInteger('weight') / 2.205;
         const height = interaction.options.getInteger('height') * 2.54 ;
-        const activity_level = interaction.options.getNumber('activity_level');
+        const activityLevel = interaction.options.getNumber('activity_level');
         const sex = interaction.options.getString('sex');
 
         const base = sex === 'male' ? 5 : -161
 
         const bmr = base + (10 * weight) + (6.25 * height) - (5 * age);
 
-        const maintenance_calories = Math.round(bmr * activity_level);
+        const maintenanceCalories = Math.round(bmr * activityLevel);
 
-        await interaction.reply({content: `Your maintenance is around ${maintenance_calories} calories a day.`, flags: MessageFlags.Ephemeral});
+        await interaction.reply({content: `Your maintenance is around ${maintenanceCalories} calories a day.`, flags: MessageFlags.Ephemeral});
     },
 };

@@ -21,7 +21,8 @@ module.exports = {
                 .addChoices(
                     { name: 'workout', value: 'workout' },
                     { name: 'rest', value: 'rest' },
-                )),
+                )
+            ),
     async execute(interaction) {
         if (interaction.options.getString('type') == 'workout') {
             await interaction.reply(`${interaction.user.username} has just checked in. They are on a --- day streak!`);
