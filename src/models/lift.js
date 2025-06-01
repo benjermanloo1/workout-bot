@@ -9,7 +9,7 @@ module.exports = sequelize.define('Lift', {
     },
     liftName: {
         type: DataTypes.STRING,
-        primaryKey: false,
+        allowNull: false,
     },
     weight: {
         type: DataTypes.INTEGER,

@@ -4,6 +4,6 @@ module.exports = new Sequelize('database', 'user', 'password', {
     dialect: 'sqlite',
     host: 'localhost',
 
-    storage: 'src/database.sqlite',
+    storage: 'database.sqlite',
     logging: false,
 });
