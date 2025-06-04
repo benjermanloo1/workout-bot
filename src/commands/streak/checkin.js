@@ -11,14 +11,40 @@ Reset every midnight (12:00 AM EST).
 async function incrementStreak(discordId, username) {
     await User.upsert({discordId, username});
 
-    
-    
-    return `${interaction.user.username} has just checked in. They are on a --- day streak!`;
-};
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
 
-async function resetStreak () {
-    return 'poop';
-}
+    const streak = await Streak.findOne({
+        where: { discordId }
+    });
+
+    if (streak) {
+        const last = new Date(streak.lastLogin);
+        const lastStr = last.toISOString().split('T')[0];
+
+        const ms = 1000 * 60 * 60 * 24;
+        const diffDays = Math.floor((today - last) / ms);
+
+        if (todayStr === lastStr) {
+            return `${username}, you've already checked in today!`
+        } else if (diffDays === 1) {
+            streak.day += 1;
+        } else {
+            streak.day = 1;
+        }
+
+        streak.lastLogin = today;
+        await streak.save();
+    } else {
+        await Streak.create({
+            discordId,
+            day: 1,
+            lastLogin: today,
+        });
+    }
+    
+    return `${username} has just checked in. They are on a ${streak.day}-day streak!`;
+};
 
 module.exports = {
     cooldown: 3,
@@ -44,6 +70,9 @@ module.exports = {
         try {
             if (type === 'workout') {
                 const message = await incrementStreak(discordId, username);
+
+                const repeat = message.includes("already checked in");
+
                 await interaction.reply(message);
             } else {
                 const message = 'test';
