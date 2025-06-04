@@ -17,6 +17,5 @@ module.exports = sequelize.define('Streak', {
     },
     lastLogin: {
         type: DataTypes.DATE,
-        allowNull: false,
     },
 });

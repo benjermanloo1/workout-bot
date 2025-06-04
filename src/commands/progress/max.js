@@ -1,5 +1,5 @@
 const { User, Lift } = require('../../models')
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 /*
 Max:
@@ -50,6 +50,7 @@ module.exports = {
             option
                 .setName('weight')
                 .setDescription('Weight lifted (lbs).')
+                .setMinValue(0)
                 .setRequired(true)
             ),
     async execute(interaction) {
@@ -62,7 +63,7 @@ module.exports = {
             const message = await logLift(discordId, username, liftName, weight);
             return interaction.reply(message);
         } catch (error) {
-			return interaction.reply('Something went wrong with tracking the lift.');
+			return interaction.reply({ content: 'Something went wrong with tracking the lift.', flags: MessageFlags.Ephemeral });
         }
     },
 };

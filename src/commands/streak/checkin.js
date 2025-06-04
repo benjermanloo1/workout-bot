@@ -1,5 +1,5 @@
 const { User, Streak } = require('../../models')
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 /*
 Check-in:
@@ -46,6 +46,37 @@ async function incrementStreak(discordId, username) {
     return `${username} has just checked in. They are on a ${streak.day}-day streak!`;
 };
 
+async function rest(discordId, username) {
+    await User.upsert({discordId, username});
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    const streak = await Streak.findOne({
+        where: { discordId }
+    });
+
+    if (streak) {
+        const last = new Date(streak.lastLogin);
+        const lastStr = last.toISOString().split('T')[0];
+
+        if (todayStr === lastStr) {
+            return `${username}, you've already checked in today!`
+        }
+
+        streak.lastLogin = today;
+        await streak.save();
+    } else {
+        await Streak.create({
+            discordId,
+            day: 0,
+            lastLogin: today,
+        });
+    }
+    
+    return `${username} is resting today.`;
+};
+
 module.exports = {
     cooldown: 3,
     category: 'streak',
@@ -71,15 +102,27 @@ module.exports = {
             if (type === 'workout') {
                 const message = await incrementStreak(discordId, username);
 
-                const repeat = message.includes("already checked in");
+                const repeat = message.includes('already checked in');
 
-                await interaction.reply(message);
+                if (repeat) {
+                    await interaction.reply({ content: message, flags: MessageFlags.Ephemeral});
+                } else {
+                    await interaction.reply(message);
+                }
             } else {
-                const message = 'test';
-                await interaction.reply(`${interaction.user.username} is resting today.`);
+                const message = await rest(discordId, username);
+
+                const repeat = message.includes('already checked in');
+
+                if (repeat) {
+                    await interaction.reply({ content: message, flags: MessageFlags.Ephemeral});
+                } else {
+                    await interaction.reply(message);
+                }
             }
         } catch (error) {
-            return interaction.reply('Something went wrong with checking in.')
+            return interaction.reply({ content: 'Something went wrong with checking in.', flags: MessageFlags.Ephemeral })
+            // return interaction.reply(`${error}`)
         }
     },
 };

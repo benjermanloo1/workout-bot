@@ -1,5 +1,5 @@
 const { Streak } = require('../../models')
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 
 /*
 Reset:
@@ -16,6 +16,7 @@ async function resetStreak(discordId, username) {
     }
     
     streak.day = 0;
+    streak.lastLogin = null;
     await streak.save();
 
     return `${username}'s streak has been reset`;
@@ -26,7 +27,8 @@ module.exports = {
     category: 'streak',
     data: new SlashCommandBuilder()
         .setName('reset')
-        .setDescription('Resets streak.'),
+        .setDescription('Resets streak.')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction) {
         const discordId = interaction.user.id;
         const username = interaction.user.username;
@@ -36,8 +38,8 @@ module.exports = {
             await interaction.reply({content: message, flags: MessageFlags.Ephemeral});
 
         } catch (error) {
-            // await interaction.reply('Something went wrong with resetting the streak.');
-            await interaction.reply(`${error}`);
+            await interaction.reply({ content: 'Something went wrong with resetting the streak.', flags: MessageFlags.Ephemeral });
+            // await interaction.reply(error);
         }
     },
 };
