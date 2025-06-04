@@ -7,6 +7,10 @@ module.exports = sequelize.define('Lift', {
         autoIncrement: true,
         primaryKey: true,
     },
+    discordId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     liftName: {
         type: DataTypes.STRING,
         allowNull: false,

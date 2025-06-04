@@ -6,6 +6,29 @@ Max:
 Users can track maxes for compound lifts (bench, squat, deadlift).
 */
 
+async function logLift(discordId, username, liftName, weight) {
+    await User.upsert({ discordId, username });
+
+    // Save storage by updating entries rather than creating new ones every time
+    const existingLift = await Lift.findOne({
+        where: { discordId, liftName }
+    });
+
+    if (existingLift) {
+        existingLift.weight = weight;
+        existingLift.dateLogged = new Date();
+        await existingLift.save();
+    } else {
+        await Lift.create({
+            discordId,
+            liftName,
+            weight
+        });
+    }
+
+    return `${username} has set a new ${liftName} max of ${weight} lbs!`;
+};
+
 module.exports = {
     cooldown: 3,
     category: 'progress',
@@ -36,29 +59,8 @@ module.exports = {
         const weight = interaction.options.getInteger('weight');
 
         try {
-            await User.upsert({discordId, username});
-
-            // Save storage by updating entries rather than creating new ones every time
-            const existingLift = await Lift.findOne({
-                where: {
-                    discordId,
-                    liftName,
-                }
-            });
-
-            if (existingLift) {
-                existingLift.weight = weight;
-                existingLift.dateLogged = new Date();
-                await existingLift.save();
-            } else {
-                await Lift.create({
-                discordId,
-                liftName,
-                weight,
-            });
-            }
-
-            return interaction.reply(`${username} has set a new ${liftName} max of ${weight} lbs!`);
+            const message = await logLift(discordId, username, liftName, weight);
+            return interaction.reply(message);
         } catch (error) {
 			return interaction.reply('Something went wrong with tracking the lift.');
         }

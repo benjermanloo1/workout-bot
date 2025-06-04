@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 
 /*
-Info - 
+Info:
 Provide name, streak, current maxes, etc.
 Able to look at other users information, unless private.
 */

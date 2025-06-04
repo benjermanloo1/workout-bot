@@ -7,7 +7,11 @@ module.exports = sequelize.define('Streak', {
         autoIncrement: true,
         primaryKey: true,
     },
-    streak: {
+    discordId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    day: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },

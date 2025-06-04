@@ -1,5 +1,10 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 
+/*
+Server:
+Display number of users and combined streak days.
+*/
+
 module.exports = {
     cooldown: 3,
     category: 'utility',

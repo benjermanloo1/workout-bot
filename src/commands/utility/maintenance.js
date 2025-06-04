@@ -1,10 +1,20 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 /*
-Maintenance - 
+Maintenance:
 User provides info through boxes (age, weight, height, activity level, sex)
 Rough estimation of maintenance calories
 */
+
+async function calculateMaintenance(age, weight, height, activityLevel, sex) {
+    const base = sex === 'male' ? 5 : -161
+
+    const bmr = base + (10 * weight) + (6.25 * height) - (5 * age);
+
+    const maintenanceCalories = Math.round(bmr * activityLevel);
+
+    return `Your maintenance is around ${maintenanceCalories} calories a day.`
+};
 
 module.exports = {
     cooldown: 3,
@@ -60,12 +70,8 @@ module.exports = {
         const activityLevel = interaction.options.getNumber('activity_level');
         const sex = interaction.options.getString('sex');
 
-        const base = sex === 'male' ? 5 : -161
+        const message = await calculateMaintenance(age, weight, height, activityLevel, sex);
 
-        const bmr = base + (10 * weight) + (6.25 * height) - (5 * age);
-
-        const maintenanceCalories = Math.round(bmr * activityLevel);
-
-        await interaction.reply({content: `Your maintenance is around ${maintenanceCalories} calories a day.`, flags: MessageFlags.Ephemeral});
+        await interaction.reply({content: message, flags: MessageFlags.Ephemeral});
     },
 };
