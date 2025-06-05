@@ -1,4 +1,5 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { User } = require('../../models')
+const { MessageFlags, SlashCommandBuilder } = require('discord.js');
 
 /*
 Server:

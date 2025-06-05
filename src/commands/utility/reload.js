@@ -1,5 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js');
 
+/*
+Reload:
+Solely for debugging purposes.
+*/
+
 module.exports = {
 	cooldown: 3,
 	category: 'utility',

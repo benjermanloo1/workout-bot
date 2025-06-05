@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { MessageFlags, SlashCommandBuilder } = require('discord.js');
 
 /*
 Add:

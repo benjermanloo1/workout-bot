@@ -1,5 +1,5 @@
-const { User, Lift } = require('../../models')
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { Lift, User } = require('../../models')
+const { MessageFlags, SlashCommandBuilder } = require('discord.js');
 
 /*
 Max:
@@ -26,7 +26,7 @@ async function logLift(discordId, username, liftName, weight) {
         });
     }
 
-    return `${username} has set a new ${liftName} max of ${weight} lbs!`;
+    return `🏋️ ${username} has set a new ${liftName} max of ${weight} lbs! 🏋️`;
 };
 
 module.exports = {

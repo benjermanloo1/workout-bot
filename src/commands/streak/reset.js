@@ -1,9 +1,9 @@
 const { Streak } = require('../../models')
-const { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
+const { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } = require('discord.js');
 
 /*
 Reset:
-Solely for testing purposes.
+Solely for debugging purposes.
 */
 
 async function resetStreak(discordId, username) {
@@ -19,7 +19,7 @@ async function resetStreak(discordId, username) {
     streak.lastLogin = null;
     await streak.save();
 
-    return `${username}'s streak has been reset`;
+    return `❌ ${username}'s streak has been reset. ❌`;
 };
 
 module.exports = {

@@ -1,5 +1,5 @@
-const { User, Streak } = require('../../models')
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { Streak, User } = require('../../models')
+const { MessageFlags, SlashCommandBuilder } = require('discord.js');
 
 /*
 Check-in:
@@ -26,7 +26,7 @@ async function incrementStreak(discordId, username) {
         const diffDays = Math.floor((today - last) / ms);
 
         if (todayStr === lastStr) {
-            return `${username}, you've already checked in today!`
+            return `🤓 ${username}, you've already checked in today! 🤓`
         } else if (diffDays === 1) {
             streak.day += 1;
         } else {
@@ -43,7 +43,7 @@ async function incrementStreak(discordId, username) {
         });
     }
     
-    return `${username} has just checked in. They are on a ${streak.day}-day streak!`;
+    return `🔥 ${username} has just checked in. They are on a ${streak.day}-day streak! 🔥`;
 };
 
 async function rest(discordId, username) {
@@ -61,7 +61,7 @@ async function rest(discordId, username) {
         const lastStr = last.toISOString().split('T')[0];
 
         if (todayStr === lastStr) {
-            return `${username}, you've already checked in today!`
+            return `🤓 ${username}, you've already checked in today! 🤓`
         }
 
         streak.lastLogin = today;
@@ -74,7 +74,7 @@ async function rest(discordId, username) {
         });
     }
     
-    return `${username} is resting today.`;
+    return `💤 ${username} is resting today. 💤`;
 };
 
 module.exports = {
