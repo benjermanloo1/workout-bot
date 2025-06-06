@@ -1,5 +1,5 @@
-const { User } = require('../../models')
-const { ActionRowBuilder, ComponentType, MessageFlags, SlashCommandBuilder, StringSelectMenuBuilder, UserSelectMenuBuilder, StringSelectMenuOptionBuilder, Message } = require('discord.js');
+const { Lift, Streak, User } = require('../../models')
+const { ActionRowBuilder, ApplicationCommandType, ComponentType, ContextMenuCommandBuilder, MessageFlags, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, Message} = require('discord.js');
 
 /*
 Info:
@@ -7,102 +7,118 @@ Provide name, streak, current maxes, etc.
 Able to look at other users information, unless private.
 */
 
-module.exports = {
-    cooldown: 3,
-    category: 'utility',
-    data: new SlashCommandBuilder()
-        .setName('info')
-        .setDescription('Provides information about a user in the server.'),
-    async execute(interaction) {
-        const username = interaction.user.username;
-        const userId = interaction.user.id;
+function capitalizeFirstLetter(str) {
+  if (!str) return str; // handle empty string or null
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
-        let userSelect = new UserSelectMenuBuilder()
-            .setCustomId(interaction.id)
-            .setPlaceholder('Select a user.');
+async function displayInformation(discordId, username, interaction) {
+    let infoSelect = new StringSelectMenuBuilder()
+        .setCustomId(interaction.id)
+        .setPlaceholder(`What would you like to know about ${username}?`)
+        .addOptions(
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Streak')
+                .setDescription(`${username}'s streak.`)
+                .setValue('streak'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Max Lifts')
+                .setDescription(`${username}'s max lifts.`)
+                .setValue('max_lifts'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Workout Routines')
+                .setDescription(`${username}'s workout routines.`)
+                .setValue('workout_routines'),
+        )
+        .setMinValues(1)
+        .setMaxValues(3);
+    
+    const infoRow = new ActionRowBuilder().addComponents(infoSelect);
 
-        const actionRow = new ActionRowBuilder()
-            .addComponents(userSelect);
+    const infoMessage = await interaction.reply({
+        components: [infoRow],
+        flags: MessageFlags.Ephemeral,
+    });
 
-        const reply = await interaction.reply({
-            components: [actionRow],
-            flags: MessageFlags.Ephemeral,
-        });
+    const infoCollector = infoMessage.createMessageComponentCollector({
+            componentType: ComponentType.StringSelect,
+            filter: (i) => i.user.id === interaction.user.id && i.customId === interaction.id,
+            time: 10_000,
+    });
 
-        const collector = reply.createMessageComponentCollector({
-            componentType: ComponentType.UserSelect,
-            filter: (i) => i.user.id === userId && i.customId === interaction.id,
-            time: 30_000,
-        });
+    infoCollector.on('collect', async (infoInteraction) => {
+            const disabledSelect = StringSelectMenuBuilder.from(infoSelect).setDisabled(true);
+            const disabledRow = new ActionRowBuilder().addComponents(disabledSelect);
 
-        collector.on('collect', async (userInteraction) => {  
-            userSelect.setDisabled(true);
-            await userInteraction.update({
-                components: [actionRow],
-                flags: MessageFlags.Ephemeral
-            });
-
-            // await userInteraction.followUp({ content: `User selected: ${username}`, flags: MessageFlags.Ephemeral });
-
-            let infoSelect = new StringSelectMenuBuilder()
-                .setCustomId(userInteraction.id)
-                .setPlaceholder(`What would you like to know about ${username}?`)
-                .addOptions(
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel('Streak')
-                        .setDescription(`${username}'s streak.`)
-                        .setValue('streak'),
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel('Max Lifts')
-                        .setDescription(`${username}'s max lifts.`)
-                        .setValue('max_lifts'),
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel('Workout Routines')
-                        .setDescription(`${username}'s workout routines.`)
-                        .setValue('workout_routines'),
-                )
-                .setMinValues(1)
-                .setMaxValues(3);
-
-            const infoRow = new ActionRowBuilder().addComponents(infoSelect);
-
-            const infoMessage = await userInteraction.followUp({
-                components: [infoRow],
+            await infoInteraction.update({
+                components: [disabledRow],
                 flags: MessageFlags.Ephemeral,
             });
 
-            const infoCollector = infoMessage.createMessageComponentCollector({
-                componentType: ComponentType.StringSelect,
-                filter: (i) => i.user.id === userId && i.customId === userInteraction.id,
-                time: 30_000,
+            const selections = infoInteraction.values;
+
+            const results = await retrieveInformation(discordId, username, selections);
+
+            await infoInteraction.followUp({
+                content: `${results}`,
+                flags: MessageFlags.Ephemeral,
             });
+    });
 
-            infoCollector.on('collect', async (infoInteraction) => {
-                infoSelect.setDisabled(true);
-                await infoInteraction.update({
-                    components: [infoRow],
-                    flags: MessageFlags.Ephemeral
-                });
+    infoCollector.on('end', async () => {
+        const timeoutSelect = StringSelectMenuBuilder.from(infoSelect).setDisabled(true);
+        const timeoutRow = new ActionRowBuilder().addComponents(timeoutSelect);
 
-                const selections = infoInteraction.values;
-
-
-
-                // CREATE HELPER FUNCTION TO RETRIEVE INFO FROM DATABASE
-                const results = selections.map((choice) => {
-                    switch (choice) {
-                        case 'streak': return `🔥 Current streak: 12 days`;
-                        case 'max_lifts': return `🏋️ Max Lifts: Bench 200 lbs, Squat 300 lbs`;
-                        case 'workout_routines': return `📅 Total Workouts: 45 sessions`;
-                        default: return '';
-                    }
-                }).join('\n');
-
-                await infoInteraction.followUp({
-                    content: `${results}`,
-                    flags: MessageFlags.Ephemeral,
-                });
+        try {
+            await interaction.editReply({
+                components: [timeoutRow],
             });
-        });
+        } catch (error) {
+            console.error('Failed to edit reply after collector ended:', error);        
+        }
+    });
+};
+
+async function retrieveInformation(discordId, username, selections) {
+    const user = await User.findOne({ where: { discordId, username }});
+
+    if (!user) return `${username} is not stored in the database.`;
+    
+
+    const results = await Promise.all(
+        selections.map(async (choice) => {
+            switch (choice) {
+                case 'streak':
+                    const streak = await Streak.findOne({ where: { discordId } });
+                    if (!streak) return `${username} does not currently have a streak.`;
+                    else return `🔥 ${username} is currently on a ${streak.day}-day streak! 🔥`;
+                case 'max_lifts':
+                    const lifts = await Lift.findAll({ where: { discordId } });
+                    if (!lifts) return `${username} has not recorded any max lifts.`;
+                    else {
+                        const maxes = lifts.map(lift => `${capitalizeFirstLetter(lift.liftName)} - ${lift.weight} lbs`).join('; ');
+                        return `🏋️ ${username}'s max lifts: ${maxes} 🏋️`;
+                    } 
+                case 'workout_routines': 
+                    return `📅 PLACEHOLDER 📅`;
+                default: return '';
+            }
+        }
+    ));
+
+    return results.join('\n');
+};
+
+module.exports = {
+    cooldown: 3,
+    category: 'utility',
+    data: new ContextMenuCommandBuilder()
+        .setName('User Info')
+        .setType(ApplicationCommandType.User),
+    async execute(interaction) {
+        const discordId = interaction.targetUser.id;
+        const username = interaction.targetUser.username;
+
+        await displayInformation(discordId, username, interaction);
     },
 };
