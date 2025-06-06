@@ -14,7 +14,7 @@ async function incrementStreak(discordId, username) {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
 
-    const streak = await Streak.findOne({
+    let streak = await Streak.findOne({
         where: { discordId }
     });
 
@@ -36,7 +36,7 @@ async function incrementStreak(discordId, username) {
         streak.lastLogin = today;
         await streak.save();
     } else {
-        await Streak.create({
+        streak = await Streak.create({
             discordId,
             day: 1,
             lastLogin: today,
@@ -52,7 +52,7 @@ async function rest(discordId, username) {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
 
-    const streak = await Streak.findOne({
+    let streak = await Streak.findOne({
         where: { discordId }
     });
 
@@ -67,7 +67,7 @@ async function rest(discordId, username) {
         streak.lastLogin = today;
         await streak.save();
     } else {
-        await Streak.create({
+        streak = await Streak.create({
             discordId,
             day: 0,
             lastLogin: today,
@@ -121,8 +121,8 @@ module.exports = {
                 }
             }
         } catch (error) {
-            return interaction.reply({ content: 'Something went wrong with checking in.', flags: MessageFlags.Ephemeral })
-            // return interaction.reply(`${error}`)
+            // return interaction.reply({ content: 'Something went wrong with checking in.', flags: MessageFlags.Ephemeral })
+            return interaction.reply({ content: `${error}`, flags: MessageFlags.Ephemeral });
         }
     },
 };

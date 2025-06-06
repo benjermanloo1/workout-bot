@@ -94,7 +94,7 @@ async function retrieveInformation(discordId, username, selections) {
                     else return `🔥  ${username} is currently on a ${streak.day}-day streak!  🔥`;
                 case 'max_lifts':
                     const lifts = await Lift.findAll({ where: { discordId } });
-                    if (!lifts) return `${username} has not recorded any max lifts.`;
+                    if (lifts.length === 0) return `${username} has not recorded any max lifts.`;
                     else {
                         const maxes = lifts.map(lift => `${capitalizeFirstLetter(lift.liftName)} - ${lift.weight} lbs`).join('; ');
                         return `🏋️  ${username}'s max lifts: ${maxes}  🏋️`;
