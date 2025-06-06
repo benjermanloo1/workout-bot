@@ -8,8 +8,8 @@ Able to look at other users information, unless private.
 */
 
 function capitalizeFirstLetter(str) {
-  if (!str) return str; // handle empty string or null
-  return str.charAt(0).toUpperCase() + str.slice(1);
+    if (!str) return str; // handle empty string or null
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 async function displayInformation(discordId, username, interaction) {
@@ -91,13 +91,13 @@ async function retrieveInformation(discordId, username, selections) {
                 case 'streak':
                     const streak = await Streak.findOne({ where: { discordId } });
                     if (!streak) return `${username} does not currently have a streak.`;
-                    else return `🔥 ${username} is currently on a ${streak.day}-day streak! 🔥`;
+                    else return `🔥  ${username} is currently on a ${streak.day}-day streak!  🔥`;
                 case 'max_lifts':
                     const lifts = await Lift.findAll({ where: { discordId } });
                     if (!lifts) return `${username} has not recorded any max lifts.`;
                     else {
                         const maxes = lifts.map(lift => `${capitalizeFirstLetter(lift.liftName)} - ${lift.weight} lbs`).join('; ');
-                        return `🏋️ ${username}'s max lifts: ${maxes} 🏋️`;
+                        return `🏋️  ${username}'s max lifts: ${maxes}  🏋️`;
                     } 
                 case 'workout_routines': 
                     return `📅 PLACEHOLDER 📅`;

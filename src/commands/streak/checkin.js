@@ -26,7 +26,7 @@ async function incrementStreak(discordId, username) {
         const diffDays = Math.floor((today - last) / ms);
 
         if (todayStr === lastStr) {
-            return `🤓 ${username}, you've already checked in today! 🤓`
+            return `🤓  ${username}, you've already checked in today!  🤓`
         } else if (diffDays === 1) {
             streak.day += 1;
         } else {
@@ -61,7 +61,7 @@ async function rest(discordId, username) {
         const lastStr = last.toISOString().split('T')[0];
 
         if (todayStr === lastStr) {
-            return `🤓 ${username}, you've already checked in today! 🤓`
+            return `🤓  ${username}, you've already checked in today!  🤓`
         }
 
         streak.lastLogin = today;

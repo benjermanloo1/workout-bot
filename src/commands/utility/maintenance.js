@@ -13,7 +13,7 @@ async function calculateMaintenance(age, weight, height, activityLevel, sex) {
 
     const maintenanceCalories = Math.round(bmr * activityLevel);
 
-    return `Your maintenance is around ${maintenanceCalories} calories a day.`
+    return `🍔  Your maintenance is around ${maintenanceCalories} calories a day.  🍔`
 };
 
 module.exports = {

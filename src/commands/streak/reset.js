@@ -19,7 +19,7 @@ async function resetStreak(discordId, username) {
     streak.lastLogin = null;
     await streak.save();
 
-    return `❌ ${username}'s streak has been reset. ❌`;
+    return `❌  ${username}'s streak has been reset.  ❌`;
 };
 
 module.exports = {

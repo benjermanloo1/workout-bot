@@ -1,4 +1,4 @@
-const { User } = require('../../models')
+const { Streak, User } = require('../../models')
 const { MessageFlags, SlashCommandBuilder } = require('discord.js');
 
 /*
@@ -13,6 +13,15 @@ module.exports = {
         .setName('server')
         .setDescription('Provides information about the server.'),
     async execute(interaction) {
-        await interaction.reply({ content: `This server is ${interaction.guild.name} and has ${interaction.guild.memberCount} members.`, flags: MessageFlags.Ephemeral });
+        const listUsers = await User.findAll();
+
+        const streaks = await Promise.all(
+            listUsers.map(user => Streak.findOne({ where: { discordId: user.discordId } }))
+        );
+
+        const total = streaks.reduce((sum, streak) => sum + (streak?.day || 0), 0);
+
+        const members = listUsers.length % 2 == 0 ? 'members' : 'member';
+        await interaction.reply(`😎  ${interaction.guild.name} has ${listUsers.length} active ${members} and ${total} total streak days  😎`);
     },
 };
