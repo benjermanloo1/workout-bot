@@ -1,5 +1,5 @@
 const { Exercise, Workout, User } = require('../../models')
-const { ActionRowBuilder, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { ActionRowBuilder, MessageFlags, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const workout = require('../../models/workout');
 
 /*
@@ -7,25 +7,23 @@ Add:
 Users can add their workouts.
 */
 
-async function addWorkout(discordId, username, workoutName, exercises, modalInteraction) {
+async function addWorkout(discordId, username, workoutName, exercises) {
     await User.upsert({ discordId, username });
 
-    const workout = Workout.findOne({
+    const workout = await Workout.findOne({
         where: {
             discordId: discordId,
             workoutName: workoutName,
         },
     });
 
-    // if (workout) {
-    //     return `🙂‍↔️  You already have a workout called ${workoutName}  🙂‍↔️`;
-    // } else {
-    //     await Workout.create({
-    //     discordId,
-    //     workoutName,
-    // })};
+    if (workout) {
+        return `🙂‍↔️  You already have a workout called ${workoutName}  🙂‍↔️`;
+    } 
+        
+    const newWorkout = await Workout.create({ discordId, workoutName });
 
-    const lines = exercises.split('\n');
+    const lines = exercises.split('\n').filter(l => l.trim() !== '');
     const validExercises = [];
     const invalidLines = [];
 
@@ -45,19 +43,48 @@ async function addWorkout(discordId, username, workoutName, exercises, modalInte
             return;
         }
 
-        const name = parts.join(' ');
+        const name = capitalizeWords(parts.join(' '));
+
+        const isValidName = /^[a-zA-Z\s\-()]+$/.test(name);
+
+        if (!isValidName) {
+            invalidLines.push(`Invalid exercise name: ${name}`);
+            return;
+        }
+
         validExercises.push({ name, sets, reps });
     })
 
+    for (const exercise of validExercises) {
+        const existingExercise = await Exercise.findOne({
+            where: {
+                workoutId: newWorkout.id,
+                workoutName: workoutName,
+                exerciseName: exercise.name,
+                sets: exercise.sets,
+                reps: exercise.reps,
+            },
+        });
+
+        if (existingExercise) {
+            continue;
+        } else {
+            await Exercise.create({
+            workoutId: newWorkout.id,
+            workoutName: workoutName,
+            exerciseName: exercise.name,
+            sets: exercise.sets,
+            reps: exercise.reps,
+        });
+        }
+    };
+
     if (invalidLines.length > 0) {
-        await modalInteraction.reply(`⚠️  Workout saved, but some lines were invalid:\n\n${invalidLines.join('\n')}  ⚠️`);
+        return `⚠️  Workout '${workoutName}' saved, but some lines were invalid:  ⚠️\n${invalidLines.join('\n')}`;
     } else {
-        await modalInteraction.reply(`✅  Workout "${workoutName}" saved with ${validExercises.length} exercises.  ✅`);
+        const numExercises = validExercises.length === 1 ? 'exercise' : 'exercises';
+        return `✅  Workout '${workoutName}' saved with ${validExercises.length} ${numExercises}.  ✅`;
     }
-
-
-
-    return splitExercises;
 };
 
 async function setupModal(interaction) {
@@ -85,6 +112,15 @@ async function setupModal(interaction) {
     await interaction.showModal(modal);
 };
 
+function capitalizeWords(str) {
+    return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
+
 module.exports = {
     cooldown: 3,
     category: 'workout',
@@ -104,7 +140,9 @@ module.exports = {
                 const workoutName = modalInteraction.fields.getTextInputValue('workoutNameInput');
                 const exercises = modalInteraction.fields.getTextInputValue('exerciseInput');
 
-                await addWorkout(discordId, username, workoutName, exercises, modalInteraction);
+                const message = await addWorkout(discordId, username, workoutName, exercises);
+
+                await modalInteraction.reply({ content: `${message}`, flags: MessageFlags.Ephemeral });
 
             })
             .catch((error) => {

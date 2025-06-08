@@ -21,7 +21,7 @@ module.exports = {
 
         const total = streaks.reduce((sum, streak) => sum + (streak?.day || 0), 0);
 
-        const members = listUsers.length % 2 == 0 ? 'members' : 'member';
+        const members = listUsers.length === 1 ? 'member' : 'members';
         await interaction.reply(`😎  ${interaction.guild.name} has ${listUsers.length} active ${members} and ${total} total streak days  😎`);
     },
 };

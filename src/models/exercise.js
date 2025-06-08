@@ -35,7 +35,7 @@ module.exports = sequelize.define('Exercise', {
     indexes: [
         {
             unique: true,
-            fields: ['workoutId', 'exerciseName']
+            fields: ['workoutId', 'exerciseName', 'sets', 'reps']
         }
     ]
 });
