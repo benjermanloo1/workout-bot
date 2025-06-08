@@ -59,7 +59,6 @@ async function addWorkout(discordId, username, workoutName, exercises) {
         const existingExercise = await Exercise.findOne({
             where: {
                 workoutId: newWorkout.id,
-                workoutName: workoutName,
                 exerciseName: exercise.name,
                 sets: exercise.sets,
                 reps: exercise.reps,
@@ -68,15 +67,15 @@ async function addWorkout(discordId, username, workoutName, exercises) {
 
         if (existingExercise) {
             continue;
-        } else {
-            await Exercise.create({
+        } 
+
+        await Exercise.create({
             workoutId: newWorkout.id,
-            workoutName: workoutName,
             exerciseName: exercise.name,
             sets: exercise.sets,
             reps: exercise.reps,
         });
-        }
+        
     };
 
     if (invalidLines.length > 0) {

@@ -15,10 +15,6 @@ module.exports = sequelize.define('Exercise', {
             key: 'id',
         }
     },
-    workoutName: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     exerciseName: {
         type: DataTypes.STRING,
         allowNull: false,
