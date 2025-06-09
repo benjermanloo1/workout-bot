@@ -134,7 +134,7 @@ module.exports = {
 
         const filter = (interaction) => interaction.customId === 'add-workout-modal';
 
-        interaction.awaitModalSubmit({ filter, time: 120_000 })
+        interaction.awaitModalSubmit({ filter, time: 300_000 })
             .then(async (modalInteraction) => {
                 const workoutName = modalInteraction.fields.getTextInputValue('workoutNameInput');
                 const exercises = modalInteraction.fields.getTextInputValue('exerciseInput');

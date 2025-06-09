@@ -14,8 +14,11 @@ Lift.belongsTo(User, { foreignKey: 'discordId' });
 Streak.belongsTo(User, { foreignKey: 'discordId' });
 
 Workout.belongsTo(User, { foreignKey: 'discordId' });
-Workout.hasMany(Exercise, { foreignKey: 'workoutId'})
+Workout.hasMany(Exercise, { foreignKey: 'workoutId' });
 
-Exercise.belongsTo(Workout, { foreignKey: 'workoutId' });
+Exercise.belongsTo(Workout, { 
+    foreignKey: 'workoutId',
+    onDelete: 'CASCADE',
+});
 
 module.exports = { User, Lift, Streak, Workout, Exercise };
