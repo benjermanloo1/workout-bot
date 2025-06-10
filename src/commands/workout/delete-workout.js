@@ -6,7 +6,7 @@ Edit:
 Users can delete their workout splits.
 */
 
-async function displayInformation(discordId, interaction) {
+async function deleteWorkout(discordId, interaction) {
     const menuOptions = await getWorkouts(discordId);
 
     if (menuOptions.length === 0) {
@@ -56,12 +56,12 @@ async function displayInformation(discordId, interaction) {
 
         if (selections.length === 1) {
             await infoInteraction.followUp({
-                content: `Deleted workout: ${selections[0]}`,
+                content: `❌  Deleted workout: ${selections[0]}  ❌`,
                 flags: MessageFlags.Ephemeral,
             });
         } else {
             await infoInteraction.followUp({
-                content: `Deleted workouts: ${selections.join(', ')}`,
+                content: `❌  Deleted workouts: ${selections.join(', ')}  ❌`,
                 flags: MessageFlags.Ephemeral,
             });
         }
@@ -109,6 +109,6 @@ module.exports = {
     async execute(interaction) {
         const discordId = interaction.user.id;
 
-        await displayInformation(discordId, interaction);
+        await deleteWorkout(discordId, interaction);
     },
 };

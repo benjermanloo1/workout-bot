@@ -136,7 +136,7 @@ module.exports = {
 
         interaction.awaitModalSubmit({ filter, time: 300_000 })
             .then(async (modalInteraction) => {
-                const workoutName = modalInteraction.fields.getTextInputValue('workoutNameInput');
+                const workoutName = modalInteraction.fields.getTextInputValue('workoutNameInput').trim();
                 const exercises = modalInteraction.fields.getTextInputValue('exerciseInput');
 
                 const message = await addWorkout(discordId, username, workoutName, exercises);
