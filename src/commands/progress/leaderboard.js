@@ -1,5 +1,5 @@
 const { Lift, User } = require('../../models')
-const { MessageFlags, SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, Message } = require('discord.js');
+const { MessageFlags, SlashCommandBuilder } = require('discord.js');
 
 /*
 Leaderboard:
@@ -15,7 +15,9 @@ function capitalizeFirstLetter(str) {
 async function getLeaderboard(users, selection) {
     const lifts = await getLifts(users);
 
-    const sorted = lifts.sort((a, b) => b[selection] - a[selection]);
+    const filtered = lifts.filter(entry => entry[selection] > 0);
+    
+    const sorted = filtered.sort((a, b) => b[selection] - a[selection]);
 
     const medals = ['🥇', '🥈', '🥉'];
 
@@ -45,7 +47,7 @@ async function getLifts(users) {
                 bench: benchWeight,
                 squat: squatWeight,
                 deadlift: deadliftWeight,
-                total: benchWeight + squatWeight + deadliftWeight
+                overall: benchWeight + squatWeight + deadliftWeight
             };
         } catch (error) {
             console.log(`Error fetching lifts for ${username}.`);
@@ -54,7 +56,7 @@ async function getLifts(users) {
                 bench: 0,
                 squat: 0,
                 deadlift: 0,
-                total: 0,
+                overall: 0,
             };
         }
     });
