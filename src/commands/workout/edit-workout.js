@@ -55,7 +55,6 @@ async function getWorkout(discordId, interaction) {
         
         workoutCollector.on('collect', async (infoInteraction) => {
             const disabledSelect = StringSelectMenuBuilder.from(workoutSelect).setDisabled(true);
-            const disabledRow = new ActionRowBuilder().addComponents(disabledSelect);
 
             const selection = await Workout.findOne({
                 where: {
